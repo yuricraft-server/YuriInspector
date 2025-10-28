@@ -2,6 +2,7 @@ import discord
 import praw
 import random
 import auth
+import seedloaf
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -68,5 +69,20 @@ async def yaoi(ctx):
 async def load_commands(ctx):
     await bot.tree.sync()
     await ctx.channel.send("commands loaded")
+
+@bot.group()
+async def server(ctx):
+    return
+
+@server.command()
+async def start(ctx):
+    seedloaf.server_interact("true")
+    await ctx.reply("server starting...")
+
+@server.command()
+@commands.has_permissions(administrator=True)
+async def stop(ctx):
+    seedloaf.server_interact("false")
+    await ctx.reply("server stoping...")
 
 bot.run(auth.discordToken)
