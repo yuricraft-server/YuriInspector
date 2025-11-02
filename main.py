@@ -1,15 +1,14 @@
 import discord
 import random
+import auth
 import seedloaf
 import asyncio
-import os
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
 from atproto import AsyncClient
 from atproto_client.models.app.bsky.embed.images import View as AppBskyEmbedImagesView
 
-env = dict(os.environ)
 bsky = AsyncClient()
 
 intents = discord.Intents.all()
@@ -23,8 +22,8 @@ async def on_ready():
 
     print("logging into bluesky...")
     await bsky.login(
-        login = env["BLUESKY_LOGIN"],
-        password = env["BLUESKY_PASSWORD"]
+        login=auth.BLUESKY_LOGIN,
+        password=auth.BLUESKY_PASSWORD
     )
 
     print(f'Logged in as {bot.user.name}\n')
@@ -41,7 +40,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 async def get_yuri(channel: discord.TextChannel, count: int):
-    profile_feed = await bsky.get_author_feed(actor=env["BLUESKY_USER"], limit=100)
+    profile_feed = await bsky.get_author_feed(actor=auth.BLUESKY_USER, limit=100)
     feed_views = random.choices(profile_feed.feed, k=count)
 
     for feed_view in feed_views:
@@ -55,7 +54,7 @@ async def get_yuri(channel: discord.TextChannel, count: int):
         dembed = discord.Embed(color=0x9BB6A7)
         dembed.set_image(url=urls[0])
         reply = await channel.send(embed=dembed)
-        yuri_channel = bot.get_channel(env["YURI_CHANNEL"])
+        yuri_channel = bot.get_channel(auth.YURI_CHANNEL)
         if channel != yuri_channel: await reply.forward(destination=yuri_channel)
 
 @bot.hybrid_command()
@@ -76,7 +75,7 @@ async def server(ctx):
     return
 
 async def startCheck(channel: discord.TextChannel, startTime):
-    statusChannel = bot.fetch_channel(env["STATUS_CHANNEL"])
+    statusChannel = bot.fetch_channel(auth.STATUS_CHANNEL)
 
     started = False
     async for message in statusChannel.history(after=startTime):
@@ -129,4 +128,4 @@ async def stop(ctx):
     seedloaf.server_interact("false")
     await ctx.reply("server stoping...")
 
-bot.run(env["TOKEN"])
+bot.run(auth.TOKEN)
