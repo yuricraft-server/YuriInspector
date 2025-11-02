@@ -3,6 +3,7 @@ import praw
 import random
 import auth
 import seedloaf
+import asyncio
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -74,10 +75,31 @@ async def load_commands(ctx):
 async def server(ctx):
     return
 
-@server.command()
+@server.command(help="it starts thge server")
 async def start(ctx):
     seedloaf.server_interact("true")
-    await ctx.reply("server starting...")
+    start = await ctx.reply("server starting...")
+
+    asyncio.sleep(120)
+
+    started = False
+    async for message in ctx.channel.history(after=start.created_at):
+        if message.author.id == bot.user.id and message.content == "**Server started!**":
+            started = True
+    
+    if not started:
+        embed = discord.Embed(
+            colour = 0xed766a,
+            description = "We're currently at max capacity,\nplease try again later."
+        )
+        embed.set_author(
+            name = "Seedloaf",
+            url = "https://seedloaf.com/",
+            icon_url = "https://seedloaf.com/_next/image?url=%2Fimages%2Flogo.webp&w=64&q=75"
+        )
+        embed.set_thumbnail(
+            url = ""
+        )
 
 @server.command()
 @commands.has_permissions(administrator=True)
