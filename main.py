@@ -76,8 +76,10 @@ async def server(ctx):
     return
 
 async def startCheck(channel: discord.TextChannel, startTime):
+    statusChannel = bot.fetch_channel(1427671782315393054)
+
     started = False
-    async for message in channel.history(after=startTime):
+    async for message in statusChannel.history(after=startTime):
         if message.author.id == bot.user.id and message.content == "**Server started!**":
             started = True
     
