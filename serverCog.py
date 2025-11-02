@@ -32,7 +32,7 @@ class server_cog(commands.Cog):
                 icon_url = "https://seedloaf.com/_next/image?url=%2Fimages%2Flogo.webp&w=64&q=75"
             )
             embed.set_thumbnail(
-                url = "https://github.com/yuricraft-server/YuriInspector/blob/main/images/error.png?raw=true"
+                url = "https://github.com/yuricraft-server/YuriInspector/blob/main/images/error_zzz.png?raw=true"
             )
 
             await channel.send(embed=embed, view=server_cog.retryView(bot=bot))
