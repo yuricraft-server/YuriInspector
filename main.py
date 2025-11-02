@@ -75,15 +75,9 @@ async def load_commands(ctx):
 async def server(ctx):
     return
 
-@server.command(help="it starts thge server")
-async def start(ctx):
-    seedloaf.server_interact("true")
-    start = await ctx.reply("server starting...")
-
-    asyncio.sleep(120)
-
+async def startCheck(channel: discord.TextChannel, startTime):
     started = False
-    async for message in ctx.channel.history(after=start.created_at):
+    async for message in channel.history(after=startTime):
         if message.author.id == bot.user.id and message.content == "**Server started!**":
             started = True
     
@@ -98,8 +92,34 @@ async def start(ctx):
             icon_url = "https://seedloaf.com/_next/image?url=%2Fimages%2Flogo.webp&w=64&q=75"
         )
         embed.set_thumbnail(
-            url = ""
+            url = "https://github.com/yuricraft-server/YuriInspector/blob/main/images/error.png?raw=true"
         )
+
+        await channel.send(embed=embed, view=retryView())
+
+class retryView(discord.ui.View):
+    @discord.ui.button(
+        label = "Try Again",
+        style = discord.ButtonStyle.primary
+    )
+    async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
+        seedloaf.server_interact("true")
+
+        button.label = "server starting..."
+        button.style = discord.ButtonStyle.secondary
+        button.disabled = True
+        await interaction.response.edit_message(view=self)
+
+        await asyncio.sleep(120)
+        await startCheck(interaction.channel, interaction.created_at)
+
+@server.command(help="it starts thge server")
+async def start(ctx):
+    seedloaf.server_interact("true")
+    starting = await ctx.reply("server starting...")
+
+    await asyncio.sleep(120)
+    await startCheck(ctx.channel, starting.created_at)
 
 @server.command()
 @commands.has_permissions(administrator=True)
