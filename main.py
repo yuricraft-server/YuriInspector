@@ -3,6 +3,7 @@ import random
 import auth
 import seedloaf
 import asyncio
+import serverCog
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -25,6 +26,9 @@ async def on_ready():
         login=auth.BLUESKY_LOGIN,
         password=auth.BLUESKY_PASSWORD
     )
+
+    print("loading cogs...")
+    await bot.add_cog(serverCog.server_cog(bot=bot))
 
     print(f'Logged in as {bot.user.name}\n')
     await bot.change_presence(activity=discord.CustomActivity(name="girls kissing"), status=discord.Status.online)
@@ -69,63 +73,5 @@ async def yaoi(ctx):
 async def load_commands(ctx):
     await bot.tree.sync()
     await ctx.channel.send("commands loaded")
-
-@bot.group()
-async def server(ctx):
-    return
-
-async def startCheck(channel: discord.TextChannel, startTime):
-    statusChannel = bot.fetch_channel(auth.STATUS_CHANNEL)
-
-    started = False
-    async for message in statusChannel.history(after=startTime):
-        if message.author.id == bot.user.id and message.content == "**Server started!**":
-            started = True
-    
-    if not started:
-        embed = discord.Embed(
-            colour = 0xed766a,
-            description = "We're currently at max capacity,\nplease try again later."
-        )
-        embed.set_author(
-            name = "Seedloaf",
-            url = "https://seedloaf.com/",
-            icon_url = "https://seedloaf.com/_next/image?url=%2Fimages%2Flogo.webp&w=64&q=75"
-        )
-        embed.set_thumbnail(
-            url = "https://github.com/yuricraft-server/YuriInspector/blob/main/images/error.png?raw=true"
-        )
-
-        await channel.send(embed=embed, view=retryView())
-
-class retryView(discord.ui.View):
-    @discord.ui.button(
-        label = "Try Again",
-        style = discord.ButtonStyle.primary
-    )
-    async def callback(self, interaction: discord.Interaction, button: discord.ui.Button):
-        seedloaf.server_interact("true")
-
-        button.label = "server starting..."
-        button.style = discord.ButtonStyle.secondary
-        button.disabled = True
-        await interaction.response.edit_message(view=self)
-
-        await asyncio.sleep(120)
-        await startCheck(interaction.channel, interaction.created_at)
-
-@server.command(help="it starts thge server")
-async def start(ctx):
-    seedloaf.server_interact("true")
-    starting = await ctx.reply("server starting...")
-
-    await asyncio.sleep(120)
-    await startCheck(ctx.channel, starting.created_at)
-
-@server.command()
-@commands.has_permissions(administrator=True)
-async def stop(ctx):
-    seedloaf.server_interact("false")
-    await ctx.reply("server stoping...")
 
 bot.run(auth.TOKEN)
