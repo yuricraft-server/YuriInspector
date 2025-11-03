@@ -4,6 +4,8 @@ import auth
 import seedloaf
 import asyncio
 import serverCog
+import uhh
+import typing
 from discord.ext import commands
 from discord import app_commands
 from datetime import datetime, timedelta
@@ -47,6 +49,7 @@ async def get_yuri(channel: discord.TextChannel, count: int):
     profile_feed = await bsky.get_author_feed(actor=auth.BLUESKY_USER, limit=100)
     feed_views = random.choices(profile_feed.feed, k=count)
 
+    embeds = [[]]
     for feed_view in feed_views:
         embed = feed_view.post.embed
         urls = []
@@ -57,7 +60,10 @@ async def get_yuri(channel: discord.TextChannel, count: int):
 
         dembed = discord.Embed(color=0x9BB6A7)
         dembed.set_image(url=urls[0])
-        reply = await channel.send(embed=dembed)
+        if len(embeds[len(embeds)-1]) == 10: embeds.append([])
+        embeds[len(embeds)-1].append(dembed)
+    for embeds_object in embeds:
+        reply = await channel.send(embeds=embeds_object)
         yuri_channel = bot.get_channel(auth.YURI_CHANNEL)
         if channel != yuri_channel: await reply.forward(destination=yuri_channel)
 
@@ -73,5 +79,19 @@ async def yaoi(ctx):
 async def load_commands(ctx):
     await bot.tree.sync()
     await ctx.channel.send("commands loaded")
+
+@bot.group()
+async def textures(ctx):
+    return
+
+@textures.command()
+@commands.has_role(1427690676635570238)
+async def release(ctx, repository: typing.Literal["MintyTex", "SimpleMintyTex"], *, title: str):
+    uhh.create_release(
+        repo = repository,
+        title = title
+    )
+
+    await ctx.reply(f"created release `{repository} {title}`.")
 
 bot.run(auth.TOKEN)
