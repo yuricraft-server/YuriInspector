@@ -4,7 +4,6 @@ import auth
 import seedloaf
 import asyncio
 import serverCog
-import uhh
 import typing
 from discord.ext import commands
 from discord import app_commands
@@ -80,18 +79,5 @@ async def load_commands(ctx):
     await bot.tree.sync()
     await ctx.channel.send("commands loaded")
 
-@bot.group()
-async def textures(ctx):
-    return
-
-@textures.command()
-@commands.has_role(1427690676635570238)
-async def release(ctx, repository: typing.Literal["MintyTex", "SimpleMintyTex"], *, title: str):
-    uhh.create_release(
-        repo = repository,
-        title = title
-    )
-
-    await ctx.reply(f"created release `{repository} {title}`.")
 
 bot.run(auth.TOKEN)
